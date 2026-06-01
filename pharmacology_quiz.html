@@ -1,0 +1,632 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>Medical Pharmacology Quiz</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display:ital@0;1&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,600;1,9..40,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #0f1117;
+    --surface: #1a1d27;
+    --surface2: #232635;
+    --border: #2e3248;
+    --accent: #6c8cff;
+    --accent2: #a78bfa;
+    --success: #34d399;
+    --danger: #f87171;
+    --text: #e8eaf6;
+    --muted: #8891b8;
+    --radius: 14px;
+  }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'DM Sans', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  /* ---- HEADER ---- */
+  .header {
+    width: 100%;
+    background: linear-gradient(135deg, #1a1d27 0%, #0f1117 100%);
+    border-bottom: 1px solid var(--border);
+    padding: 0 2rem;
+  }
+  .header-inner {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 2rem 0 1.5rem;
+  }
+  .header h1 {
+    font-family: 'DM Serif Display', serif;
+    font-size: clamp(1.8rem, 4vw, 2.6rem);
+    background: linear-gradient(135deg, #a78bfa, #6c8cff);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+    line-height: 1.2;
+  }
+  .header p { color: var(--muted); margin-top: 0.4rem; font-size: 0.95rem; }
+  /* ---- PROGRESS ---- */
+  .progress-wrap {
+    width: 100%;
+    max-width: 800px;
+    padding: 1.2rem 2rem 0;
+    position: sticky;
+    top: 0;
+    z-index: 10;
+    background: var(--bg);
+    padding-bottom: 0.8rem;
+    border-bottom: 1px solid var(--border);
+  }
+  .progress-row {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+  }
+  .progress-label { font-size: 0.85rem; color: var(--muted); }
+  .progress-count { font-size: 0.9rem; font-weight: 600; color: var(--accent); }
+  .progress-bar-outer {
+    height: 6px;
+    background: var(--surface2);
+    border-radius: 99px;
+    overflow: hidden;
+  }
+  .progress-bar-inner {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent2), var(--accent));
+    border-radius: 99px;
+    transition: width 0.4s cubic-bezier(.4,0,.2,1);
+  }
+  /* ---- MAIN CONTENT ---- */
+  .main {
+    width: 100%;
+    max-width: 800px;
+    padding: 2rem;
+    flex: 1;
+  }
+  /* ---- START SCREEN ---- */
+  #start-screen {
+    text-align: center;
+    padding: 4rem 2rem;
+  }
+  .start-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+  }
+  #start-screen h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2rem;
+    margin-bottom: 1rem;
+  }
+  #start-screen p {
+    color: var(--muted);
+    max-width: 500px;
+    margin: 0 auto 0.6rem;
+    line-height: 1.6;
+  }
+  .stats-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    max-width: 480px;
+    margin: 2rem auto;
+  }
+  .stat-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    text-align: center;
+  }
+  .stat-card .num {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    color: var(--accent);
+  }
+  .stat-card .lbl { font-size: 0.8rem; color: var(--muted); margin-top: 0.2rem; }
+  /* ---- QUESTION CARD ---- */
+  .q-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.8rem 2rem;
+    margin-bottom: 1.5rem;
+    animation: fadeSlide 0.3s ease;
+  }
+  @keyframes fadeSlide {
+    from { opacity: 0; transform: translateY(16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .q-meta {
+    display: flex;
+    align-items: center;
+    gap: 0.6rem;
+    margin-bottom: 1rem;
+  }
+  .q-badge {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: white;
+    font-size: 0.75rem;
+    font-weight: 600;
+    padding: 0.2rem 0.7rem;
+    border-radius: 99px;
+    letter-spacing: 0.05em;
+  }
+  .q-id { font-size: 0.8rem; color: var(--muted); }
+  .q-text {
+    font-size: 1.05rem;
+    line-height: 1.65;
+    font-weight: 400;
+    color: var(--text);
+    margin-bottom: 1.4rem;
+  }
+  /* ---- OPTIONS ---- */
+  .options-list { display: flex; flex-direction: column; gap: 0.6rem; }
+  .option-btn {
+    width: 100%;
+    text-align: left;
+    padding: 0.85rem 1.1rem;
+    border-radius: 10px;
+    border: 1.5px solid var(--border);
+    background: var(--surface2);
+    color: var(--text);
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    line-height: 1.4;
+    display: flex;
+    align-items: flex-start;
+    gap: 0.8rem;
+    transition: border-color 0.15s, background 0.15s, transform 0.1s;
+    position: relative;
+  }
+  .option-btn:hover:not(:disabled) {
+    border-color: var(--accent);
+    background: rgba(108,140,255,0.1);
+    transform: translateX(2px);
+  }
+  .option-btn .opt-letter {
+    min-width: 26px;
+    height: 26px;
+    border-radius: 50%;
+    border: 1.5px solid var(--muted);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 0.8rem;
+    font-weight: 600;
+    color: var(--muted);
+    flex-shrink: 0;
+    transition: all 0.15s;
+  }
+  .option-btn.selected { border-color: var(--accent); background: rgba(108,140,255,0.15); }
+  .option-btn.selected .opt-letter { background: var(--accent); border-color: var(--accent); color: white; }
+  .option-btn.correct { border-color: var(--success); background: rgba(52,211,153,0.12); }
+  .option-btn.correct .opt-letter { background: var(--success); border-color: var(--success); color: white; }
+  .option-btn.wrong { border-color: var(--danger); background: rgba(248,113,113,0.1); }
+  .option-btn.wrong .opt-letter { background: var(--danger); border-color: var(--danger); color: white; }
+  .option-btn:disabled { cursor: default; }
+  /* ---- FEEDBACK ---- */
+  .feedback {
+    margin-top: 1rem;
+    padding: 0.8rem 1rem;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    font-weight: 500;
+    display: none;
+  }
+  .feedback.correct { background: rgba(52,211,153,0.15); color: var(--success); border: 1px solid rgba(52,211,153,0.3); display: block; }
+  .feedback.wrong { background: rgba(248,113,113,0.1); color: var(--danger); border: 1px solid rgba(248,113,113,0.25); display: block; }
+  /* ---- NAV BUTTONS ---- */
+  .nav-row {
+    display: flex;
+    gap: 0.8rem;
+    justify-content: flex-end;
+    margin-top: 0.5rem;
+  }
+  .btn {
+    padding: 0.7rem 1.6rem;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    font-size: 0.95rem;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent2), var(--accent));
+    color: white;
+  }
+  .btn-primary:hover { opacity: 0.88; transform: translateY(-1px); }
+  .btn-outline {
+    background: transparent;
+    border: 1.5px solid var(--border);
+    color: var(--muted);
+  }
+  .btn-outline:hover { border-color: var(--accent); color: var(--accent); }
+  .btn-lg {
+    padding: 0.9rem 2.5rem;
+    font-size: 1rem;
+    border-radius: 12px;
+  }
+  /* ---- RESULTS ---- */
+  #results-screen { display: none; }
+  .results-hero {
+    text-align: center;
+    padding: 2rem 0;
+  }
+  .score-ring {
+    width: 160px;
+    height: 160px;
+    margin: 0 auto 1.5rem;
+    position: relative;
+  }
+  .score-ring svg { transform: rotate(-90deg); }
+  .score-ring .ring-bg { fill: none; stroke: var(--surface2); stroke-width: 12; }
+  .score-ring .ring-fill { fill: none; stroke-width: 12; stroke-linecap: round; transition: stroke-dashoffset 1s ease; }
+  .score-center {
+    position: absolute;
+    top: 50%; left: 50%;
+    transform: translate(-50%, -50%);
+    text-align: center;
+  }
+  .score-pct {
+    font-family: 'DM Serif Display', serif;
+    font-size: 2.2rem;
+    line-height: 1;
+  }
+  .score-lbl { font-size: 0.75rem; color: var(--muted); }
+  .results-hero h2 {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.8rem;
+    margin-bottom: 0.4rem;
+  }
+  .results-hero p { color: var(--muted); }
+  .results-stats {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 1rem;
+    margin: 1.5rem 0 2rem;
+  }
+  .res-stat {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem;
+    text-align: center;
+  }
+  .res-stat .n {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.7rem;
+  }
+  .res-stat.c .n { color: var(--success); }
+  .res-stat.w .n { color: var(--danger); }
+  .res-stat.s .n { color: var(--accent); }
+  .res-stat .l { font-size: 0.8rem; color: var(--muted); margin-top: 0.3rem; }
+  /* ---- REVIEW ---- */
+  .review-header {
+    font-family: 'DM Serif Display', serif;
+    font-size: 1.3rem;
+    margin-bottom: 1rem;
+    padding-top: 1rem;
+    border-top: 1px solid var(--border);
+  }
+  .review-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 1.2rem 1.4rem;
+    margin-bottom: 0.8rem;
+    border-left: 4px solid var(--border);
+  }
+  .review-item.correct-item { border-left-color: var(--success); }
+  .review-item.wrong-item { border-left-color: var(--danger); }
+  .review-item.skipped-item { border-left-color: var(--muted); }
+  .review-q { font-size: 0.95rem; margin-bottom: 0.7rem; }
+  .review-ans { font-size: 0.85rem; }
+  .review-ans span { font-weight: 600; }
+  .tag { display: inline-block; font-size: 0.72rem; font-weight: 600; padding: 0.15rem 0.5rem; border-radius: 99px; margin-bottom: 0.5rem; }
+  .tag.c { background: rgba(52,211,153,0.15); color: var(--success); }
+  .tag.w { background: rgba(248,113,113,0.1); color: var(--danger); }
+  .tag.s { background: rgba(136,145,184,0.15); color: var(--muted); }
+  .results-actions { display: flex; gap: 1rem; justify-content: center; margin: 1.5rem 0; flex-wrap: wrap; }
+  /* ---- HIDDEN ---- */
+  .hidden { display: none !important; }
+  /* ---- FILTER TABS ---- */
+  .filter-tabs { display: flex; gap: 0.5rem; margin-bottom: 1rem; flex-wrap: wrap; }
+  .ftab {
+    padding: 0.35rem 0.9rem;
+    border-radius: 99px;
+    border: 1.5px solid var(--border);
+    background: transparent;
+    color: var(--muted);
+    font-size: 0.82rem;
+    font-weight: 600;
+    cursor: pointer;
+    font-family: 'DM Sans', sans-serif;
+    transition: all 0.15s;
+  }
+  .ftab.active { background: var(--accent); border-color: var(--accent); color: white; }
+  /* ---- MOBILE ---- */
+  @media (max-width: 600px) {
+    .main { padding: 1rem; }
+    .stats-grid { grid-template-columns: repeat(3, 1fr); }
+    .results-stats { grid-template-columns: repeat(3, 1fr); }
+    .q-card { padding: 1.2rem 1rem; }
+  }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="header-inner">
+    <h1>Medical Pharmacology Quiz</h1>
+    <p>200 questions · Shuffled order · Instant feedback</p>
+  </div>
+</div>
+
+<div class="progress-wrap hidden" id="progress-wrap">
+  <div class="progress-row">
+    <span class="progress-label">Progress</span>
+    <span class="progress-count" id="prog-count">0 / 199</span>
+  </div>
+  <div class="progress-bar-outer">
+    <div class="progress-bar-inner" id="prog-bar" style="width:0%"></div>
+  </div>
+</div>
+
+<div class="main">
+
+  <!-- START SCREEN -->
+  <div id="start-screen">
+    <div class="start-icon">🧬</div>
+    <h2>Ready to Test Your Knowledge?</h2>
+    <p>This quiz covers pharmacodynamics, pharmacokinetics, drug classes, mechanisms of action, and clinical pharmacology.</p>
+    <p>Answer all questions, then submit to see your score and review every answer in detail.</p>
+    <div class="stats-grid">
+      <div class="stat-card"><div class="num">199</div><div class="lbl">Questions</div></div>
+      <div class="stat-card"><div class="num">~30</div><div class="lbl">Min est.</div></div>
+      <div class="stat-card"><div class="num">MCQ</div><div class="lbl">Format</div></div>
+    </div>
+    <button class="btn btn-primary btn-lg" onclick="startQuiz()">Start Quiz →</button>
+  </div>
+
+  <!-- QUIZ SCREEN -->
+  <div id="quiz-screen" class="hidden">
+    <div id="q-container"></div>
+    <div class="nav-row">
+      <button class="btn btn-outline" id="prev-btn" onclick="navigate(-1)">← Prev</button>
+      <button class="btn btn-primary" id="next-btn" onclick="navigate(1)">Next →</button>
+      <button class="btn btn-primary hidden" id="submit-btn" onclick="submitQuiz()" style="background:linear-gradient(135deg,#34d399,#059669);">Submit Quiz ✓</button>
+    </div>
+  </div>
+
+  <!-- RESULTS SCREEN -->
+  <div id="results-screen">
+    <div class="results-hero">
+      <div class="score-ring">
+        <svg width="160" height="160" viewBox="0 0 160 160">
+          <circle class="ring-bg" cx="80" cy="80" r="68"/>
+          <circle class="ring-fill" id="ring-fill" cx="80" cy="80" r="68" stroke-dasharray="427.3" stroke-dashoffset="427.3"/>
+        </svg>
+        <div class="score-center">
+          <div class="score-pct" id="score-pct">0%</div>
+          <div class="score-lbl">Score</div>
+        </div>
+      </div>
+      <h2 id="result-title">Quiz Complete!</h2>
+      <p id="result-sub"></p>
+    </div>
+    <div class="results-stats">
+      <div class="res-stat c"><div class="n" id="r-correct">0</div><div class="l">Correct</div></div>
+      <div class="res-stat w"><div class="n" id="r-wrong">0</div><div class="l">Wrong</div></div>
+      <div class="res-stat s"><div class="n" id="r-skip">0</div><div class="l">Skipped</div></div>
+    </div>
+    <div class="results-actions">
+      <button class="btn btn-outline" onclick="retakeQuiz()">↺ Retake Quiz</button>
+    </div>
+    <div class="review-header">Answer Review</div>
+    <div class="filter-tabs">
+      <button class="ftab active" onclick="filterReview('all',this)">All (199)</button>
+      <button class="ftab" onclick="filterReview('correct',this)" id="ftab-c">Correct</button>
+      <button class="ftab" onclick="filterReview('wrong',this)" id="ftab-w">Wrong</button>
+      <button class="ftab" onclick="filterReview('skipped',this)" id="ftab-s">Skipped</button>
+    </div>
+    <div id="review-list"></div>
+  </div>
+
+</div>
+
+<script>
+const QUESTIONS = [{"id": 54, "question": "Mechanism of action of neostigmine methylsulfate", "options": [{"letter": "A", "text": "stimulates adrenoreceptors"}, {"letter": "B", "text": "blocks adrenoreceptors"}, {"letter": "C", "text": "directly stimulates the cholinergic receptors"}, {"letter": "D", "text": "inhibits the enzyme acetylcholinesterase"}, {"letter": "E", "text": "blocks cholinergic receptors"}], "correct": "D", "display_num": 1}, {"id": 176, "question": "Medazepam (mezapam) is", "options": [{"letter": "A", "text": "psychostimulating agent"}, {"letter": "B", "text": "nootropic agent"}, {"letter": "C", "text": "antipsychotic agent"}, {"letter": "D", "text": "anxiolytic"}, {"letter": "E", "text": "antidepressant"}], "correct": "D", "display_num": 2}, {"id": 37, "question": "A local anesthetic used for all types of anesthesia", "options": [{"letter": "A", "text": "benzocaine (anesthetic)"}, {"letter": "B", "text": "procaine (novocaine)"}, {"letter": "C", "text": "trimecaine"}, {"letter": "D", "text": "lidocaine"}, {"letter": "E", "text": "bupivacaine (marcaine)"}], "correct": "D", "display_num": 3}, {"id": 116, "question": "Metoprolol blocks mainly", "options": [{"letter": "A", "text": "alpha1-adrenergic receptors"}, {"letter": "B", "text": "beta2-adrenergic receptors"}, {"letter": "C", "text": "beta 3-adrenergic receptors"}, {"letter": "D", "text": "beta1-adrenergic receptors"}, {"letter": "E", "text": "alpha2-adrenergic receptors"}], "correct": "D", "display_num": 4}, {"id": 153, "question": "Fentanyl by analgesic activity", "options": [{"letter": "A", "text": "superior to morphine"}, {"letter": "B", "text": "inferior to morphine"}, {"letter": "C", "text": "corresponds to morphine"}], "correct": "A", "display_num": 5}, {"id": 25, "question": "An irresistible desire for repeated doses of a medicinal substance is characteristic of", "options": [{"letter": "A", "text": "drug addiction"}, {"letter": "B", "text": "addictive"}, {"letter": "C", "text": "idiosyncrasies"}, {"letter": "D", "text": "cumulations"}, {"letter": "E", "text": "tolerance"}], "correct": "A", "display_num": 6}, {"id": 77, "question": "Depolarization of the postsynaptic membrane of neuromuscular synapses are caused by", "options": [{"letter": "A", "text": "vecuronium"}, {"letter": "B", "text": "pancuronium (pavulon)"}, {"letter": "C", "text": "suxamethonia iodide (ditilin)"}, {"letter": "D", "text": "pipecuronium (arduan)"}, {"letter": "E", "text": "tubocurarine"}], "correct": "C", "display_num": 7}, {"id": 133, "question": "Diazepam and phenazepam", "options": [{"letter": "A", "text": "weaken GABA-ergic processes in the brain"}, {"letter": "B", "text": "cause insomnia"}, {"letter": "C", "text": "benzodiazepine receptor agonists"}, {"letter": "D", "text": "enhance glutamatergic processes in the brain"}, {"letter": "E", "text": "enhance dopaminergic processes in the brain"}], "correct": "C", "display_num": 8}, {"id": 61, "question": "Atropine reduces the motility and tone of the gastrointestinal tract due to", "options": [{"letter": "A", "text": "blockades of beta-adrenergic receptors"}, {"letter": "B", "text": "blockades of N-cholinergic receptors"}, {"letter": "C", "text": "blockades of M-cholinergic receptors"}, {"letter": "D", "text": "blockades of alpha-adrenergic receptors"}, {"letter": "E", "text": "myotropic antispasmodic action"}], "correct": "C", "display_num": 9}, {"id": 11, "question": "The metabolic rate of drugs is increased", "options": [{"letter": "A", "text": "in children in the first months of life"}, {"letter": "B", "text": "when using inducers of microsomal liver enzymes"}, {"letter": "C", "text": "pregnant women"}, {"letter": "D", "text": "for liver diseases"}, {"letter": "E", "text": "in the elderly"}], "correct": "B", "display_num": 10}, {"id": 123, "question": "Indications for the use of sympatholytic reserpine", "options": [{"letter": "A", "text": "hypotension"}, {"letter": "B", "text": "cardiac arrhythmias"}, {"letter": "C", "text": "angina pectoris"}, {"letter": "D", "text": "arterial hypertension"}, {"letter": "E", "text": "stomach ulcer"}], "correct": "D", "display_num": 11}, {"id": 200, "question": "Mechanism of action of neuroleptics", "options": [{"letter": "A", "text": "excites benzodiazepine receptors"}, {"letter": "B", "text": "block m-cholinergic receptors"}, {"letter": "C", "text": "Block D2 dopamine receptors"}, {"letter": "D", "text": "excite GABA receptors"}, {"letter": "E", "text": "stimulate the release of norepinephrine and dopamine from the nerve endings"}], "correct": "C", "display_num": 12}, {"id": 49, "question": "Anticholinesterase agent of reversible action", "options": [{"letter": "A", "text": "pilocarpine hydrochloride"}, {"letter": "B", "text": "hexamethonium benzosulfonate"}, {"letter": "C", "text": "atropine"}, {"letter": "D", "text": "neostigmine methylsulfate (proserin)"}, {"letter": "E", "text": "acetylcholine"}], "correct": "D", "display_num": 13}, {"id": 147, "question": "Morphine when acting on the gastrointestinal tract", "options": [{"letter": "A", "text": "accelerates the evacuation of contents from the stomach"}, {"letter": "B", "text": "lowers the tone of the sphincters"}, {"letter": "C", "text": "causes constipation"}, {"letter": "D", "text": "causes diarrhea"}, {"letter": "E", "text": "accelerates the movement of the contents through the intestine"}], "correct": "C", "display_num": 14}, {"id": 184, "question": "Amantadine (midantan)", "options": [{"letter": "A", "text": "Non-competitive NMDA receptor antagonist"}, {"letter": "B", "text": "dopamine precursor"}, {"letter": "C", "text": "MAO-B inhibitor"}, {"letter": "D", "text": "stimulates dopamine receptors"}], "correct": "A", "display_num": 15}, {"id": 33, "question": "Means that depress afferent innervation", "options": [{"letter": "A", "text": "holinoblockers"}, {"letter": "B", "text": "adrenoblockers"}, {"letter": "C", "text": "irritating agents"}, {"letter": "D", "text": "anesthetics"}, {"letter": "E", "text": "cholinomimetics"}], "correct": "D", "display_num": 16}, {"id": 188, "question": "An atypical neuroleptic derivative of dibenzodiazepine is", "options": [{"letter": "A", "text": "diazepam"}, {"letter": "B", "text": "droperidol"}, {"letter": "C", "text": "clozapine"}, {"letter": "D", "text": "sulpiride (eglonyl)"}, {"letter": "E", "text": "reserpine"}], "correct": "C", "display_num": 17}, {"id": 128, "question": "Correct statement -", "options": [{"letter": "A", "text": "ethyl alcohol has an anti-shock effect"}, {"letter": "B", "text": "ethyl alcohol does not cause dependence"}, {"letter": "C", "text": "ethyl alcohol is used as a means for anesthesia"}, {"letter": "D", "text": "ethyl alcohol reduces heat transfer"}], "correct": "A", "display_num": 18}, {"id": 181, "question": "Peripheral DOPA decarboxylase inhibitor, used in combination with levodopa to increase the safety of therapy", "options": [{"letter": "A", "text": "atropine"}, {"letter": "B", "text": "carbidopa"}, {"letter": "C", "text": "amantadine"}, {"letter": "D", "text": "scopolamine"}, {"letter": "E", "text": "biperiden"}], "correct": "B", "display_num": 19}, {"id": 40, "question": "M-cholinomimetics, acting on the eye, cause", "options": [{"letter": "A", "text": "accommodation paralysis"}, {"letter": "B", "text": "increased intraocular pressure"}, {"letter": "C", "text": "pupil dilation (mydriasis)"}, {"letter": "D", "text": "pupil constriction (miosis)"}, {"letter": "E", "text": "photophobia"}], "correct": "D", "display_num": 20}, {"id": 168, "question": "Acetylsalicylic acid", "options": [{"letter": "A", "text": "suppresses prostacyclin synthesis to a greater extent than thromboxane"}, {"letter": "B", "text": "stimulates thromboxansynthetase"}, {"letter": "C", "text": "inhibits thromboxane synthetase"}, {"letter": "D", "text": "stimulates cyclooxygenase"}, {"letter": "E", "text": "inhibits cyclooxygenase"}], "correct": "E", "display_num": 21}, {"id": 111, "question": "Beta blockers", "options": [{"letter": "A", "text": "lower the tone of the bronchi"}, {"letter": "B", "text": "increase blood pressure"}, {"letter": "C", "text": "increase the tone of the bronchi"}, {"letter": "D", "text": "increase the automatism of the heart"}, {"letter": "E", "text": "increase the strength of heart contractions"}], "correct": "C", "display_num": 22}, {"id": 129, "question": "Ethyl alcohol for pulmonary edema", "options": [{"letter": "A", "text": "stimulates the breathing center"}, {"letter": "B", "text": "reduces bronchial tone"}, {"letter": "C", "text": "has an anti-foaming effect"}, {"letter": "D", "text": "reduces pressure in the small circle of blood circulation"}, {"letter": "E", "text": "has a dehydrating effect"}], "correct": "C", "display_num": 23}, {"id": 24, "question": "Reducing the effect of a medicinal substance with its repeated administration is called", "options": [{"letter": "A", "text": "idiosyncrasy"}, {"letter": "B", "text": "drug addiction"}, {"letter": "C", "text": "hypersensitivity (tolerance)"}, {"letter": "D", "text": "addictive"}, {"letter": "E", "text": "withdrawal syndrome"}], "correct": "D", "display_num": 24}, {"id": 50, "question": "Anticholinesterase agents", "options": [{"letter": "A", "text": "increase the tone of the smooth muscles of the intestine and bladder"}, {"letter": "B", "text": "reduce neuromuscular transmission"}, {"letter": "C", "text": "cause tachycardia"}, {"letter": "D", "text": "increase intraocular pressure"}, {"letter": "E", "text": "cause accommodation paralysis"}], "correct": "A", "display_num": 25}, {"id": 42, "question": "Indications for the use of pilocarpine", "options": [{"letter": "A", "text": "hypersalivation"}, {"letter": "B", "text": "angina pectoris"}, {"letter": "C", "text": "myasthenia gravis"}, {"letter": "D", "text": "glaucoma"}, {"letter": "E", "text": "hypertension"}], "correct": "D", "display_num": 26}, {"id": 92, "question": "Beta2-adrenomimetics", "options": [{"letter": "A", "text": "narrow the bronchi"}, {"letter": "B", "text": "increase mainly the tone of the myometrium"}, {"letter": "C", "text": "enhance the contractile activity of the myometrium"}, {"letter": "D", "text": "weaken the contractile activity of the myometrium"}], "correct": "D", "display_num": 27}, {"id": 182, "question": "Dry mouth, paresis of accommodation, urinary retention and constipation - side effects", "options": [{"letter": "A", "text": "trihexyphenidyl (cyclodol)"}, {"letter": "B", "text": "levodopa"}, {"letter": "C", "text": "magnesium sulfate"}, {"letter": "D", "text": "bromocriptine"}, {"letter": "E", "text": "selegilina"}], "correct": "A", "display_num": 28}, {"id": 139, "question": "Endorphins and enkephalins interact", "options": [{"letter": "A", "text": "with cholinergic receptors"}, {"letter": "B", "text": "with GABA receptors"}, {"letter": "C", "text": "with opioid receptors"}, {"letter": "D", "text": "with 5 HT1 -serotonin receptors"}, {"letter": "E", "text": "with adrenoreceptors"}], "correct": "C", "display_num": 29}, {"id": 119, "question": "Side effect of propranolol", "options": [{"letter": "A", "text": "atrioventricular block"}, {"letter": "B", "text": "ulcerogenic effect"}, {"letter": "C", "text": "lowering the tone of the bronchi"}, {"letter": "D", "text": "orthostatic hypotension"}, {"letter": "E", "text": "tachycardia"}], "correct": "A", "display_num": 30}, {"id": 7, "question": "The main mechanism of absorption of most drugs in the digestive tract", "options": [{"letter": "A", "text": "lightweight diffusion"}, {"letter": "B", "text": "active transport"}, {"letter": "C", "text": "filtering"}, {"letter": "D", "text": "passive diffusion"}, {"letter": "E", "text": "pinocytosis"}], "correct": "D", "display_num": 31}, {"id": 149, "question": "The tone of the sphincters of the gastrointestinal tract morphine", "options": [{"letter": "A", "text": "lowers"}, {"letter": "B", "text": "does not change"}, {"letter": "C", "text": "increases"}], "correct": "C", "display_num": 32}, {"id": 198, "question": "A neuroleptic used for neuroleptanalgesia is", "options": [{"letter": "A", "text": "diazepam"}, {"letter": "B", "text": "clozapine"}, {"letter": "C", "text": "sulpiride"}, {"letter": "D", "text": "reserpine"}, {"letter": "E", "text": "droperidol"}], "correct": "E", "display_num": 33}, {"id": 30, "question": "In case of an overdose of morphine , it is used", "options": [{"letter": "A", "text": "protamine sulfate"}, {"letter": "B", "text": "neostigmine methyl sulfate"}, {"letter": "C", "text": "naloxone"}, {"letter": "D", "text": "flumazenil"}], "correct": "C", "display_num": 34}, {"id": 173, "question": "Anxiolytic, hypnotic and antiepileptic effects are characteristic of", "options": [{"letter": "A", "text": "diazepam"}, {"letter": "B", "text": "lamotrigine"}, {"letter": "C", "text": "ethosuximide"}, {"letter": "D", "text": "morphine"}, {"letter": "E", "text": "phenytoin (diphenin)"}], "correct": "A", "display_num": 35}, {"id": 78, "question": "Muscle relaxants suxamethonium iodide (ditilin)", "options": [{"letter": "A", "text": "causes persistent depolarization of the postsynaptic membrane"}, {"letter": "B", "text": "disrupts the synthesis of acetylcholine in the motor nerve endings"}, {"letter": "C", "text": "prevents depolarization of the postsynaptic membrane"}], "correct": "A", "display_num": 36}, {"id": 52, "question": "To increase the tone of skeletal muscles in myasthenia gravis ,", "options": [{"letter": "A", "text": "ganglioblockers"}, {"letter": "B", "text": "anticholinesterase agents"}, {"letter": "C", "text": "muscle relaxants"}, {"letter": "D", "text": "M-cholinomimetics"}, {"letter": "E", "text": "M-holinoblockers"}], "correct": "B", "display_num": 37}, {"id": 132, "question": "The effect of diazepam", "options": [{"letter": "A", "text": "antiarrhythmic"}, {"letter": "B", "text": "sleeping pills"}, {"letter": "C", "text": "antiemetic"}, {"letter": "D", "text": "painkiller"}, {"letter": "E", "text": "antiparkinsonian"}], "correct": "B", "display_num": 38}, {"id": 113, "question": "The effect of beta-blockers", "options": [{"letter": "A", "text": "antiemetic"}, {"letter": "B", "text": "anti-ulcer"}, {"letter": "C", "text": "bronchodilator"}, {"letter": "D", "text": "antispasmodic"}, {"letter": "E", "text": "hypotensive"}], "correct": "E", "display_num": 39}, {"id": 32, "question": "Ethyl alcohol is used for poisoning with methyl alcohol, since it", "options": [{"letter": "A", "text": "depresses the central nervous system"}, {"letter": "B", "text": "competes with methyl alcohol for alcohol dehydrogenase"}, {"letter": "C", "text": "increases diuresis"}, {"letter": "D", "text": "has a defoaming property"}, {"letter": "E", "text": "has a diuretic effect"}], "correct": "B", "display_num": 40}, {"id": 97, "question": "A sympathomimetic is", "options": [{"letter": "A", "text": "epinephrine (adrenaline)"}, {"letter": "B", "text": "norepinephrine (norepinephrine)"}, {"letter": "C", "text": "salbutamol"}, {"letter": "D", "text": "ephedrine"}, {"letter": "E", "text": "xylometazoline (galazoline)"}], "correct": "D", "display_num": 41}, {"id": 103, "question": "Alpha-blockers reduce blood pressure because", "options": [{"letter": "A", "text": "reduce the work of the heart"}, {"letter": "B", "text": "dilate arterial vessels"}, {"letter": "C", "text": "reduce the volume of blood plasma"}], "correct": "B", "display_num": 42}, {"id": 75, "question": "A group of drugs that blocks neuromuscular transmission is called", "options": [{"letter": "A", "text": "M-holinoblockers"}, {"letter": "B", "text": "muscle relaxants"}, {"letter": "C", "text": "ganglioblockers"}, {"letter": "D", "text": "acetylcholinesterase reactivators"}, {"letter": "E", "text": "anticholinesterase agents"}], "correct": "B", "display_num": 43}, {"id": 13, "question": "The acceleration of the excretion of weak acids by the kidneys occurs when the reaction of primary urine changes", "options": [{"letter": "A", "text": "in the sour side"}, {"letter": "B", "text": "in the alkaline side"}, {"letter": "C", "text": "to the neutral side"}], "correct": "B", "display_num": 44}, {"id": 19, "question": "Medicinal substances with affinity and internal activity that cause the maximum possible pharmacological effect when stimulating specific receptors are", "options": [{"letter": "A", "text": "complete agonists"}, {"letter": "B", "text": "agonists - antagonists"}, {"letter": "C", "text": "partial agonists"}, {"letter": "D", "text": "antagonists"}], "correct": "A", "display_num": 45}, {"id": 191, "question": "The antipsychotic effect of chlorpromazine (aminazine) is mainly associated with the blockade of dopamine receptors", "options": [{"letter": "A", "text": "mesolimbic and mesocortical systems"}, {"letter": "B", "text": "cerebellum"}, {"letter": "C", "text": "extrapyramidal system"}, {"letter": "D", "text": "thalamus"}, {"letter": "E", "text": "hypothalamus"}], "correct": "A", "display_num": 46}, {"id": 95, "question": "An adrenomimetic used in combination with local anesthetics", "options": [{"letter": "A", "text": "epinephrine (adrenaline)"}, {"letter": "B", "text": "isoprenaline hydrochloride"}, {"letter": "C", "text": "xylometazoline (galazoline)"}, {"letter": "D", "text": "dobutamine (dobutrex)"}, {"letter": "E", "text": "salbutamol (ventolin)"}], "correct": "A", "display_num": 47}, {"id": 21, "question": "Repeated administration of drugs that cause euphoria leads to the development of", "options": [{"letter": "A", "text": "synergy"}, {"letter": "B", "text": "distributions"}, {"letter": "C", "text": "drug addiction"}, {"letter": "D", "text": "potentiation"}, {"letter": "E", "text": "antagonism"}], "correct": "C", "display_num": 48}, {"id": 68, "question": "M-holinoblockers are used for", "options": [{"letter": "A", "text": "pupil dilation and fundus examination"}, {"letter": "B", "text": "treatment of pneumonia"}, {"letter": "C", "text": "treatment of conjunctivitis"}, {"letter": "D", "text": "reduction of intraocular pressure"}, {"letter": "E", "text": "treatment of hypertension"}], "correct": "A", "display_num": 49}, {"id": 48, "question": "Anticholinesterase agent", "options": [{"letter": "A", "text": "nitroglycerin"}, {"letter": "B", "text": "acetylcholine"}, {"letter": "C", "text": "furosemide"}, {"letter": "D", "text": "neostigmine methyl sulfate"}, {"letter": "E", "text": "atropine"}], "correct": "D", "display_num": 50}, {"id": 190, "question": "Antipsychotic effect of chlorpromazine (aminazine) explain", "options": [{"letter": "A", "text": "inhibition of dopaminergic processes in the central nervous system"}, {"letter": "B", "text": "stimulation of dopaminergic processes in the central nervous system"}, {"letter": "C", "text": "stimulation of adrenergic processes in the central nervous system"}, {"letter": "D", "text": "blockade of H1-histamine receptors in the central nervous system"}, {"letter": "E", "text": "inhibition of adrenergic processes in the central nervous system"}], "correct": "A", "display_num": 51}, {"id": 46, "question": "Pilocarpine", "options": [{"letter": "A", "text": "inhibits acetylcholinesterase"}, {"letter": "B", "text": "Blocks M-cholinergic receptors"}, {"letter": "C", "text": "Directly stimulates N-cholinergic receptors"}, {"letter": "D", "text": "activates acetylcholinesterase"}, {"letter": "E", "text": "Directly stimulates M-cholinergic receptors"}], "correct": "E", "display_num": 52}, {"id": 161, "question": "With long-term use of opioid analgesics, their effectiveness", "options": [{"letter": "A", "text": "practically unchanged"}, {"letter": "B", "text": "goes down"}, {"letter": "C", "text": "increases"}], "correct": "B", "display_num": 53}, {"id": 159, "question": "The mechanism of action of naloxone", "options": [{"letter": "A", "text": "blocks opioid receptors"}, {"letter": "B", "text": "inhibits lipoxygenase"}, {"letter": "C", "text": "inhibits cyclooxygenase"}, {"letter": "D", "text": "stimulates opioid receptors"}], "correct": "A", "display_num": 54}, {"id": 183, "question": "Amantadine (midantan) is used as", "options": [{"letter": "A", "text": "analgesic agent"}, {"letter": "B", "text": "antiepileptic agent"}, {"letter": "C", "text": "sedative"}, {"letter": "D", "text": "antiparkinsonian means"}, {"letter": "E", "text": "sleeping pills"}], "correct": "D", "display_num": 55}, {"id": 73, "question": "A short-acting ganglioblocker is", "options": [{"letter": "A", "text": "trepyria iodide (hygronium)"}, {"letter": "B", "text": "suxamethonium chloride (listenone)"}, {"letter": "C", "text": "suxamethonium iodide (ditiline)"}, {"letter": "D", "text": "tubocurarine"}, {"letter": "E", "text": "azamethonium bromide (pentamine)"}], "correct": "A", "display_num": 56}, {"id": 142, "question": "Threshold of pain sensitivity under the influence of analgesics", "options": [{"letter": "A", "text": "goes down"}, {"letter": "B", "text": "does not change"}, {"letter": "C", "text": "increases"}], "correct": "C", "display_num": 57}, {"id": 91, "question": "Beta2-adrenomimetics (salbutamol, phenoterol)", "options": [{"letter": "A", "text": "increase the tone and contractile activity of the myometrium"}, {"letter": "B", "text": "reduce the tone of the bronchi"}, {"letter": "C", "text": "increase blood pressure"}, {"letter": "D", "text": "cause peripheral vascular spasm"}, {"letter": "E", "text": "increase the tone of the bronchi"}], "correct": "B", "display_num": 58}, {"id": 55, "question": "The mechanism of action of armin is to", "options": [{"letter": "A", "text": "irreversibly block acetylcholinesterase"}, {"letter": "B", "text": "directly stimulate m-cholinergic receptors"}, {"letter": "C", "text": "directly stimulate n-cholinergic receptors"}, {"letter": "D", "text": "Block N-cholinergic receptors"}, {"letter": "E", "text": "stimulate acetylcholinesterase"}], "correct": "A", "display_num": 59}, {"id": 31, "question": "In case of overdose of sleeping pills - benzodiazepine derivatives are used", "options": [{"letter": "A", "text": "nalorphine"}, {"letter": "B", "text": "flumazenil"}, {"letter": "C", "text": "fluoxetine"}], "correct": "B", "display_num": 60}, {"id": 125, "question": "Gaseous substance for inhalation anesthesia", "options": [{"letter": "A", "text": "ketamine"}, {"letter": "B", "text": "nitrous oxide"}, {"letter": "C", "text": "propanidide"}, {"letter": "D", "text": "propofol"}, {"letter": "E", "text": "halothane"}], "correct": "B", "display_num": 61}, {"id": 83, "question": "Alpha2-adrenomimetic is", "options": [{"letter": "A", "text": "phenylephrine (mezaton)"}, {"letter": "B", "text": "epinephrine (adrenaline)"}, {"letter": "C", "text": "xylometazoline (galazoline)"}, {"letter": "D", "text": "phenoterol (berotec)"}, {"letter": "E", "text": "dobutamine (dobutrex)"}], "correct": "C", "display_num": 62}, {"id": 179, "question": "Trihexyphenidyl (cyclodol) is", "options": [{"letter": "A", "text": "Central M-holinoblocker"}, {"letter": "B", "text": "dopamine precursor"}, {"letter": "C", "text": "peripheral DOPA decarboxylase inhibitor"}, {"letter": "D", "text": "MAO-B inhibitor"}], "correct": "A", "display_num": 63}, {"id": 34, "question": "Means that stimulate afferent innervation", "options": [{"letter": "A", "text": "astringents"}, {"letter": "B", "text": "enveloping agents"}, {"letter": "C", "text": "cholinomimetics"}, {"letter": "D", "text": "anesthetics"}, {"letter": "E", "text": "irritating agents"}], "correct": "E", "display_num": 64}, {"id": 197, "question": "A neuroleptic - with psychomotor agitation - is", "options": [{"letter": "A", "text": "clozapine"}, {"letter": "B", "text": "chlorprotixen"}, {"letter": "C", "text": "haloperidol"}, {"letter": "D", "text": "levomepromazine"}, {"letter": "E", "text": "droperidol"}], "correct": "D", "display_num": 65}, {"id": 2, "question": "Pharmacokinetics studies", "options": [{"letter": "A", "text": "pharmacological effects"}, {"letter": "B", "text": "Targets for drug action"}, {"letter": "C", "text": "excretion from the body"}, {"letter": "D", "text": "mechanism of action"}, {"letter": "E", "text": "localization of the action"}], "correct": "C", "display_num": 66}, {"id": 169, "question": "The mechanism of anti-inflammatory action of nonsteroidal anti-inflammatory drugs is as follows", "options": [{"letter": "A", "text": "stimulation of opioid receptors in the central nervous system"}, {"letter": "B", "text": "blockade of pain receptors on the periphery"}, {"letter": "C", "text": "induction of lipoprotein biosynthesis"}, {"letter": "D", "text": "inhibition of cyclooxygenase -2"}, {"letter": "E", "text": "inhibition of phospholipase a2"}], "correct": "D", "display_num": 67}, {"id": 20, "question": "Substances that cause a reaction less than the maximum when stimulating specific receptors are called", "options": [{"letter": "A", "text": "antagonists"}, {"letter": "B", "text": "full agonists"}, {"letter": "C", "text": "agonists"}, {"letter": "D", "text": "agonists-antagonists"}, {"letter": "E", "text": "partial agonists"}], "correct": "E", "display_num": 68}, {"id": 112, "question": "The heart's need for oxygen beta-blockers", "options": [{"letter": "A", "text": "reduce"}, {"letter": "B", "text": "do not change"}, {"letter": "C", "text": "increase"}], "correct": "A", "display_num": 69}, {"id": 143, "question": "Morphine causes", "options": [{"letter": "A", "text": "diarrhea"}, {"letter": "B", "text": "arousal of the respiratory center"}, {"letter": "C", "text": "dysphoria"}, {"letter": "D", "text": "anti-inflammatory effect"}, {"letter": "E", "text": "analgesia"}], "correct": "E", "display_num": 70}, {"id": 87, "question": "Actions of Epinephrine is to", "options": [{"letter": "A", "text": "slow down AV conduction"}, {"letter": "B", "text": "lower the heart rate"}, {"letter": "C", "text": "increase heart rate"}, {"letter": "D", "text": "increase bronchial tone"}, {"letter": "E", "text": "lower blood glucose levels"}], "correct": "C", "display_num": 71}, {"id": 90, "question": "Beta1-adrenomimetics dobutamine is used", "options": [{"letter": "A", "text": "with bronchospasms"}, {"letter": "B", "text": "with arrhythmias"}, {"letter": "C", "text": "in case of heart failure"}, {"letter": "D", "text": "with a runny nose (rhinitis)"}, {"letter": "E", "text": "to weaken the contractile activity of the myometrium"}], "correct": "C", "display_num": 72}, {"id": 174, "question": "Antiparkinsonian agent blocking central cholinergic receptors", "options": [{"letter": "A", "text": "levodopa"}, {"letter": "B", "text": "platyphillin"}, {"letter": "C", "text": "carbidopa"}, {"letter": "D", "text": "bromocriptine"}, {"letter": "E", "text": "biperiden"}], "correct": "E", "display_num": 73}, {"id": 79, "question": "Suxamethonia iodide (ditilin) is", "options": [{"letter": "A", "text": "contraindicated in glaucoma"}, {"letter": "B", "text": "antidepolarizing muscle relaxant"}, {"letter": "C", "text": "may cause bronchospasm"}, {"letter": "D", "text": "may cause paralysis of the diaphragm"}, {"letter": "E", "text": "depolarizing muscle relaxant"}], "correct": "E", "display_num": 74}, {"id": 151, "question": "Opioid analgesic - an agonist of opioid receptors", "options": [{"letter": "A", "text": "naloxone (narcan)"}, {"letter": "B", "text": "morphine"}, {"letter": "C", "text": "naltrexone (trexan)"}, {"letter": "D", "text": "droperidol (droleptan)"}, {"letter": "E", "text": "paracetamol"}], "correct": "B", "display_num": 75}, {"id": 136, "question": "Barbiturates", "options": [{"letter": "A", "text": "do not affect microsomal liver enzymes"}, {"letter": "B", "text": "inhibit the activity of microsomal liver enzymes"}, {"letter": "C", "text": "cause the induction of microsomal liver enzymes"}], "correct": "C", "display_num": 76}, {"id": 195, "question": "The hypothermic effect of antipsychotic drugs is associated with the blockade of dopamine receptors", "options": [{"letter": "A", "text": "extrapyramidal system"}, {"letter": "B", "text": "mesolimbic system"}, {"letter": "C", "text": "hypothalamus"}], "correct": "C", "display_num": 77}, {"id": 109, "question": "Beta blockers", "options": [{"letter": "A", "text": "cause myosis"}, {"letter": "B", "text": "increase the heart rate"}, {"letter": "C", "text": "reduce the strength of heart contractions"}, {"letter": "D", "text": "increase the strength of heart contractions"}, {"letter": "E", "text": "facilitate atrioventricular conduction"}], "correct": "C", "display_num": 78}, {"id": 51, "question": "Indications for the use of anticholinesterase agents", "options": [{"letter": "A", "text": "diarrhea"}, {"letter": "B", "text": "intestinal atony"}, {"letter": "C", "text": "colic"}, {"letter": "D", "text": "angina pectoris"}, {"letter": "E", "text": "premedication"}], "correct": "B", "display_num": 79}, {"id": 58, "question": "Accommodation paralysis is caused by", "options": [{"letter": "A", "text": "M-holinoblockers"}, {"letter": "B", "text": "M-cholinomimetics"}, {"letter": "C", "text": "anticholinesterase agents"}], "correct": "A", "display_num": 80}, {"id": 10, "question": "Metabolic transformation processes in drug metabolism", "options": [{"letter": "A", "text": "formation of compounds with glucuronic acid"}, {"letter": "B", "text": "acetylation reactions"}, {"letter": "C", "text": "methylation reactions"}, {"letter": "D", "text": "oxidation reactions"}, {"letter": "E", "text": "sulfating reactions"}], "correct": "D", "display_num": 81}, {"id": 26, "question": "The teratogenic effect of drugs is most likely", "options": [{"letter": "A", "text": "later in pregnancy"}, {"letter": "B", "text": "immediately before childbirth"}, {"letter": "C", "text": "during all periods of pregnancy"}, {"letter": "D", "text": "in the first 3 months of pregnancy"}, {"letter": "E", "text": "between the 4th and 6th months of pregnancy"}], "correct": "D", "display_num": 82}, {"id": 89, "question": "It has a direct stimulating effect on all types of adrenoreceptors. It is used for anaphylactic shock, cardiac arrest, for relief of asthma attacks", "options": [{"letter": "A", "text": "epinephrine (adrenaline)"}, {"letter": "B", "text": "isoprenaline (isadrine)"}, {"letter": "C", "text": "norepinephrine (norepinephrine)"}, {"letter": "D", "text": "phenylephrine (mezaton)"}, {"letter": "E", "text": "salbutamol"}], "correct": "A", "display_num": 83}, {"id": 189, "question": "Antipsychotic drugs cause parkinsonism phenomena because they block dopamine receptors", "options": [{"letter": "A", "text": "trigger zone of the vomiting center"}, {"letter": "B", "text": "hypothalamus"}, {"letter": "C", "text": "basal ganglia"}, {"letter": "D", "text": "mesolimbic system"}, {"letter": "E", "text": "mesocortical system"}], "correct": "C", "display_num": 84}, {"id": 4, "question": "The environment of the digestive tract, in which slightly acidic medicinal substances are better absorbed", "options": [{"letter": "A", "text": "neutral"}, {"letter": "B", "text": "alkaline"}, {"letter": "C", "text": "sour"}], "correct": "C", "display_num": 85}, {"id": 163, "question": "A non-opioid analgesic of central action, inhibits the enzyme cyclooxygenase, causes an antipyretic effect, does not have an anti-inflammatory effect", "options": [{"letter": "A", "text": "morphine"}, {"letter": "B", "text": "trimeperidine"}, {"letter": "C", "text": "paracetamol"}, {"letter": "D", "text": "fentanyl"}, {"letter": "E", "text": "tramadol"}], "correct": "C", "display_num": 86}, {"id": 18, "question": "Substances that have affinity for specific receptors, do not have internal activity and interfere with the action of endogenous ligands and agonists on the receptors are called", "options": [{"letter": "A", "text": "partial agonists"}, {"letter": "B", "text": "agonists- antagonists"}, {"letter": "C", "text": "complete agonists"}, {"letter": "D", "text": "agonists"}, {"letter": "E", "text": "antagonists"}], "correct": "E", "display_num": 87}, {"id": 16, "question": "The ability of drugs to stimulate it and cause specific effects when interacting with the receptor is called", "options": [{"letter": "A", "text": "tolerance"}, {"letter": "B", "text": "efficiency"}, {"letter": "C", "text": "bioavailability"}, {"letter": "D", "text": "internal activity"}, {"letter": "E", "text": "affinity"}], "correct": "D", "display_num": 88}, {"id": 15, "question": "Affinity is", "options": [{"letter": "A", "text": "the ability of a substance to bind to specific receptors"}, {"letter": "B", "text": "the ability of a substance to block receptors"}, {"letter": "C", "text": "the ability of a substance to reduce the number of receptors"}, {"letter": "D", "text": "the dose of the substance causing a specific effect"}, {"letter": "E", "text": "the ability of a substance to cause an effect when interacting with receptors"}], "correct": "A", "display_num": 89}, {"id": 114, "question": "Beta-blockers are used when", "options": [{"letter": "A", "text": "bradycardia"}, {"letter": "B", "text": "arterial hypertension"}, {"letter": "C", "text": "angina pectoris"}, {"letter": "D", "text": "constipation"}, {"letter": "E", "text": "bronchospasm"}], "correct": "C", "display_num": 90}, {"id": 155, "question": "Indications for the use of opioid analgesics", "options": [{"letter": "A", "text": "muscle pain"}, {"letter": "B", "text": "joint pain"}, {"letter": "C", "text": "fever"}, {"letter": "D", "text": "headache"}, {"letter": "E", "text": "pain in malignant neoplasms"}], "correct": "E", "display_num": 91}, {"id": 165, "question": "As antipyretics for fever , they are used", "options": [{"letter": "A", "text": "non-narcotic analgesics"}, {"letter": "B", "text": "narcotic analgesics"}, {"letter": "C", "text": "antagonists of narcotic analgesics"}], "correct": "A", "display_num": 92}, {"id": 86, "question": "The adrenomimetic used for atrioventricular blockade is", "options": [{"letter": "A", "text": "atropine"}, {"letter": "B", "text": "isoprenaline (isadrine)"}, {"letter": "C", "text": "phenoterol"}, {"letter": "D", "text": "salbutamol"}], "correct": "B", "display_num": 93}, {"id": 118, "question": "Atenolol and metoprolol", "options": [{"letter": "A", "text": "beta1,beta2-adrenoblockers"}, {"letter": "B", "text": "alpha,beta blockers"}, {"letter": "C", "text": "alpha 2-adrenoblockers"}, {"letter": "D", "text": "alpha1-adrenoblockers"}, {"letter": "E", "text": "beta1-adrenoblockers"}], "correct": "E", "display_num": 94}, {"id": 130, "question": "A drug with a hypnotic effect from the group of benzodiazepines", "options": [{"letter": "A", "text": "phenobarbital"}, {"letter": "B", "text": "zolpidem"}, {"letter": "C", "text": "zopiclone"}, {"letter": "D", "text": "ethaminal-sodium"}, {"letter": "E", "text": "nitrazepam"}], "correct": "E", "display_num": 95}, {"id": 69, "question": "What agents are contraindicated in glaucoma", "options": [{"letter": "A", "text": "M-cholinomimetics"}, {"letter": "B", "text": "anticholinesterase agents"}, {"letter": "C", "text": "M-holinoblockers"}], "correct": "C", "display_num": 96}, {"id": 148, "question": "Excitability of the cough reflex center morphine", "options": [{"letter": "A", "text": "does not change"}, {"letter": "B", "text": "depressing"}, {"letter": "C", "text": "stimulates"}], "correct": "B", "display_num": 97}, {"id": 38, "question": "A local anesthetic agent used primarily for infiltration and conduction anesthesia", "options": [{"letter": "A", "text": "procaine (novocaine)"}, {"letter": "B", "text": "sodium oxybutyrate"}, {"letter": "C", "text": "nitrous oxide"}, {"letter": "D", "text": "enalapril"}, {"letter": "E", "text": "benzocaine (anesthetic)"}], "correct": "A", "display_num": 98}, {"id": 12, "question": "Acceleration of renal excretion of weak bases occurs when the reaction of primary urine changes", "options": [{"letter": "A", "text": "to the neutral side"}, {"letter": "B", "text": "in the sour side"}, {"letter": "C", "text": "in the alkaline side"}], "correct": "B", "display_num": 99}, {"id": 71, "question": "What medicine can inhibit cholinergic mechanisms in the brain", "options": [{"letter": "A", "text": "selegiline"}, {"letter": "B", "text": "trihexyphenidyl (cyclodol)"}, {"letter": "C", "text": "amantadine (midantan)"}, {"letter": "D", "text": "levodopa"}, {"letter": "E", "text": "bromocriptine"}], "correct": "B", "display_num": 100}, {"id": 146, "question": "The size of the pupils under the influence of morphine (in therapeutic doses)", "options": [{"letter": "A", "text": "does not change"}, {"letter": "B", "text": "increases (mydriasis)"}, {"letter": "C", "text": "decreases (myosis)"}], "correct": "C", "display_num": 101}, {"id": 105, "question": "Prazosin is", "options": [{"letter": "A", "text": "M-holinoblocker"}, {"letter": "B", "text": "alpha1, alpha2-adrenoblocker"}, {"letter": "C", "text": "beta1, beta2-adrenoblocker"}, {"letter": "D", "text": "alpha1-adrenoblocker"}, {"letter": "E", "text": "beta1-adrenoblocker"}], "correct": "D", "display_num": 102}, {"id": 74, "question": "Antidepolarizing muscle relaxant is", "options": [{"letter": "A", "text": "neostigmine methyl sulfate"}, {"letter": "B", "text": "suxamethonia iodide (ditilin)"}, {"letter": "C", "text": "atropine sulfate"}, {"letter": "D", "text": "hexamethonium benzosulfonate"}, {"letter": "E", "text": "tubocurarine"}], "correct": "E", "display_num": 103}, {"id": 180, "question": "Mechanism of antiparkinsonian action of levodopa", "options": [{"letter": "A", "text": "directly stimulates dopamine receptors in the central nervous system"}, {"letter": "B", "text": "blocks m-cholinergic receptors in the central nervous system"}, {"letter": "C", "text": "blocks dopamine receptors in the central nervous system"}, {"letter": "D", "text": "it is a precursor to dopamine"}, {"letter": "E", "text": "stimulates m-cholinergic receptors in the central nervous system"}], "correct": "D", "display_num": 104}, {"id": 6, "question": "Enteral route of administration, which ensures the entry of drugs into the general bloodstream, bypassing the liver", "options": [{"letter": "A", "text": "sublingual"}, {"letter": "B", "text": "into the duodenum"}, {"letter": "C", "text": "into the muscle"}, {"letter": "D", "text": "to vienna"}, {"letter": "E", "text": "inside"}], "correct": "A", "display_num": 105}, {"id": 186, "question": "Carbidopa is", "options": [{"letter": "A", "text": "dopamine precursor"}, {"letter": "B", "text": "MAO-B inhibitor"}, {"letter": "C", "text": "peripheral DOPA decarboxylase inhibitor"}, {"letter": "D", "text": "directly stimulates dopamine receptors"}, {"letter": "E", "text": "disrupts the neuronal capture of dopamine"}], "correct": "C", "display_num": 106}, {"id": 144, "question": "Morphine causes", "options": [{"letter": "A", "text": "drug addiction"}, {"letter": "B", "text": "insomnia"}, {"letter": "C", "text": "increased secretion of hydrochloric acid in the stomach"}, {"letter": "D", "text": "increased blood pressure"}, {"letter": "E", "text": "stimulation of breathing"}], "correct": "A", "display_num": 107}, {"id": 41, "question": "M-cholinomimetics cause", "options": [{"letter": "A", "text": "lowering the tone of the bronchi"}, {"letter": "B", "text": "increased heart rate"}, {"letter": "C", "text": "lowering of intestinal tone and peristalsis"}, {"letter": "D", "text": "increased blood pressure"}, {"letter": "E", "text": "increased bladder tone"}], "correct": "E", "display_num": 108}, {"id": 137, "question": "It is used as a hypnotic and antiepileptic agent, induces the induction of microsomal liver enzymes", "options": [{"letter": "A", "text": "trimetin"}, {"letter": "B", "text": "sodium valproate"}, {"letter": "C", "text": "ethosuximide"}, {"letter": "D", "text": "phenytoin (diphenin)"}, {"letter": "E", "text": "phenobarbital"}], "correct": "E", "display_num": 109}, {"id": 94, "question": "Salbutamol mainly stimulates", "options": [{"letter": "A", "text": "alpha1-adrenergic receptors"}, {"letter": "B", "text": "alpha2-adrenergic receptors"}, {"letter": "C", "text": "beta1-adrenergic receptors"}, {"letter": "D", "text": "beta 3-adrenergic receptors"}, {"letter": "E", "text": "beta2-adrenergic receptors"}], "correct": "E", "display_num": 110}, {"id": 100, "question": "Norepinephrine is injected", "options": [{"letter": "A", "text": "inside"}, {"letter": "B", "text": "under the skin"}, {"letter": "C", "text": "into the muscle"}, {"letter": "D", "text": "to vienna"}, {"letter": "E", "text": "under the tongue"}], "correct": "D", "display_num": 111}, {"id": 117, "question": "Bisoprolol (concor), unlike propranolol (anaprilin), has little effect on", "options": [{"letter": "A", "text": "bronchial tone"}, {"letter": "B", "text": "atrioventricular conduction"}, {"letter": "C", "text": "automatism of the sinus node"}, {"letter": "D", "text": "heart rate strength"}, {"letter": "E", "text": "heart rate"}], "correct": "A", "display_num": 112}, {"id": 43, "question": "Pilocarpine is used", "options": [{"letter": "A", "text": "with intestinal colic"}, {"letter": "B", "text": "for accommodation paralysis when picking up glasses"}, {"letter": "C", "text": "with glaucoma"}, {"letter": "D", "text": "for corneal anesthesia"}, {"letter": "E", "text": "to examine the fundus"}], "correct": "C", "display_num": 113}, {"id": 199, "question": "The antiemetic effect of phenothiazine and butyrophenone derivatives is associated with the blockade of dopamine receptors", "options": [{"letter": "A", "text": "starting area of the vomiting center"}, {"letter": "B", "text": "vestibular apparatus"}, {"letter": "C", "text": "basal ganglia"}, {"letter": "D", "text": "hypothalamus"}, {"letter": "E", "text": "mesolimbic system"}], "correct": "A", "display_num": 114}, {"id": 84, "question": "Beta2-adrenomimetic is", "options": [{"letter": "A", "text": "epinephrine (adrenaline)"}, {"letter": "B", "text": "xylometazoline (galazoline)"}, {"letter": "C", "text": "isoprenaline (isadrine)"}, {"letter": "D", "text": "salbutamol (ventolin)"}, {"letter": "E", "text": "phenylephrine (mezaton)"}], "correct": "D", "display_num": 115}, {"id": 157, "question": "Acute morphine poisoning is characterized by", "options": [{"letter": "A", "text": "respiratory depression"}, {"letter": "B", "text": "stimulation of breathing"}, {"letter": "C", "text": "excitement"}, {"letter": "D", "text": "aggression"}, {"letter": "E", "text": "cough"}], "correct": "A", "display_num": 116}, {"id": 60, "question": "Atropine causes", "options": [{"letter": "A", "text": "dilation of pupils and reduction of intraocular pressure"}, {"letter": "B", "text": "pupil constriction and increased intraocular pressure"}, {"letter": "C", "text": "dilation of pupils and increased intraocular pressure"}, {"letter": "D", "text": "accommodation spasm"}, {"letter": "E", "text": "constriction of pupils and reduction of intraocular pressure"}], "correct": "C", "display_num": 117}, {"id": 127, "question": "A means for non-inhalation anesthesia", "options": [{"letter": "A", "text": "sevoflurane"}, {"letter": "B", "text": "diethyl ether"}, {"letter": "C", "text": "nitrous oxide"}, {"letter": "D", "text": "thiopental-sodium"}, {"letter": "E", "text": "halothane"}], "correct": "D", "display_num": 118}, {"id": 196, "question": "To create artificial hypothermia , it is used", "options": [{"letter": "A", "text": "chlorpromazine (aminazine)"}, {"letter": "B", "text": "droperidol"}, {"letter": "C", "text": "sulpiride"}, {"letter": "D", "text": "haloperidol"}, {"letter": "E", "text": "reserpine"}], "correct": "A", "display_num": 119}, {"id": 85, "question": "Beta1, beta2-adrenomimetic is", "options": [{"letter": "A", "text": "xylometazoline (galazoline)"}, {"letter": "B", "text": "isoprenaline (isadrine)"}, {"letter": "C", "text": "salbutamol (ventolin)"}, {"letter": "D", "text": "phenylephrine (mezaton)"}, {"letter": "E", "text": "epinephrine (adrenaline)"}], "correct": "B", "display_num": 120}, {"id": 5, "question": "The environment of the digestive tract, in which medicinal substances that are weak bases are better absorbed", "options": [{"letter": "A", "text": "neutral"}, {"letter": "B", "text": "alkaline"}, {"letter": "C", "text": "sour"}], "correct": "B", "display_num": 121}, {"id": 175, "question": "Drug addiction can cause", "options": [{"letter": "A", "text": "nootropic drugs"}, {"letter": "B", "text": "sedatives"}, {"letter": "C", "text": "anxiolytics from the benzodiazepine group"}, {"letter": "D", "text": "lithium preparations"}, {"letter": "E", "text": "antipsychotic drugs"}], "correct": "C", "display_num": 122}, {"id": 62, "question": "The subtype of M-cholinergic receptors that is blocked by pyrenzepine is", "options": [{"letter": "A", "text": "M3-cholinergic receptors"}, {"letter": "B", "text": "M2-cholinergic receptors"}, {"letter": "C", "text": "M1-cholinergic receptors"}], "correct": "C", "display_num": 123}, {"id": 145, "question": "The analgesic effect of opioid analgesics is mainly associated with their effect on", "options": [{"letter": "A", "text": "interneuronal transmission in the brain and spinal cord"}, {"letter": "B", "text": "synthesis of prostaglandins"}, {"letter": "C", "text": "conducting impulses along afferent nerves"}], "correct": "A", "display_num": 124}, {"id": 134, "question": "Sleeping pills - \"non-benzodiazepine\" agonist of benzodiazepine receptors", "options": [{"letter": "A", "text": "zolpidem"}, {"letter": "B", "text": "diazepam"}, {"letter": "C", "text": "flumazenil"}, {"letter": "D", "text": "phenobarbital"}, {"letter": "E", "text": "phenazepam"}], "correct": "A", "display_num": 125}, {"id": 160, "question": "Naloxone is effective in respiratory depression caused by", "options": [{"letter": "A", "text": "opioid analgesics"}, {"letter": "B", "text": "means for anesthesia"}, {"letter": "C", "text": "ethyl alcohol"}, {"letter": "D", "text": "sleeping pills"}], "correct": "A", "display_num": 126}, {"id": 35, "question": "Local anesthetic", "options": [{"letter": "A", "text": "losartan"}, {"letter": "B", "text": "ketamine"}, {"letter": "C", "text": "bromhexine"}, {"letter": "D", "text": "pilocarpine"}, {"letter": "E", "text": "lidocaine"}], "correct": "E", "display_num": 127}, {"id": 65, "question": "A decrease in cervical tone under the influence of atropine is associated with blockade", "options": [{"letter": "A", "text": "beta 2-adrenergic receptors"}, {"letter": "B", "text": "alpha-adrenergic receptors"}, {"letter": "C", "text": "M-cholinergic receptors"}], "correct": "C", "display_num": 128}, {"id": 53, "question": "Euromuscular transmission is facilitated by", "options": [{"letter": "A", "text": "M-cholinomimetics"}, {"letter": "B", "text": "M-holinoblockers"}, {"letter": "C", "text": "muscle relaxants"}, {"letter": "D", "text": "ganglioblockers"}, {"letter": "E", "text": "anticholinesterase agents"}], "correct": "E", "display_num": 129}, {"id": 171, "question": "An antiepileptic drug from the barbiturate group", "options": [{"letter": "A", "text": "ethosuximide"}, {"letter": "B", "text": "diazepam"}, {"letter": "C", "text": "carbamazepine"}, {"letter": "D", "text": "diazepam"}, {"letter": "E", "text": "phenytoin"}, {"letter": "F", "text": "phenobarbital"}, {"letter": "G", "text": "carbamazepine GPC-6 (6.4) 172 To relieve the epileptic status , apply GPC -7 (7.1)"}, {"letter": "H", "text": "ethosuximide"}, {"letter": "I", "text": "phenytoin"}], "correct": "F", "display_num": 130}, {"id": 120, "question": "Propranolol (anaprilin) increases", "options": [{"letter": "A", "text": "the force of heart contractions"}, {"letter": "B", "text": "heart rate"}, {"letter": "C", "text": "bronchial tone"}, {"letter": "D", "text": "atrioventricular conduction"}, {"letter": "E", "text": "automatism of the heart"}], "correct": "C", "display_num": 131}, {"id": 23, "question": "The accumulation of a medicinal substance in the body during its repeated administration is called", "options": [{"letter": "A", "text": "functional cumulation"}, {"letter": "B", "text": "drug addiction"}, {"letter": "C", "text": "material accumulation"}, {"letter": "D", "text": "addictive"}, {"letter": "E", "text": "potentiation"}], "correct": "C", "display_num": 132}, {"id": 162, "question": "Analgesic with a mixed mechanism of action (opioid+ non opioid)", "options": [{"letter": "A", "text": "tramadol"}, {"letter": "B", "text": "trimeperidine"}, {"letter": "C", "text": "morphine"}, {"letter": "D", "text": "paracetamol"}, {"letter": "E", "text": "metamizole-sodium"}], "correct": "A", "display_num": 133}, {"id": 81, "question": "Alpha, beta-adrenomimetic is", "options": [{"letter": "A", "text": "isoprenaline (isadrine)"}, {"letter": "B", "text": "epinephrine (adrenaline)"}, {"letter": "C", "text": "salbutamol (ventolin)"}, {"letter": "D", "text": "phenylephrine (mezaton)"}, {"letter": "E", "text": "phenoterol (berotec)"}], "correct": "B", "display_num": 134}, {"id": 115, "question": "Under the influence of beta-blockers intraocular pressure", "options": [{"letter": "A", "text": "goes down"}, {"letter": "B", "text": "does not change"}, {"letter": "C", "text": "increases"}], "correct": "A", "display_num": 135}, {"id": 9, "question": "Conjugation processes in drug metabolism", "options": [{"letter": "A", "text": "glucuronidation reactions"}, {"letter": "B", "text": "oxidative deamination reactions"}, {"letter": "C", "text": "hydrolysis reactions"}, {"letter": "D", "text": "recovery reactions"}], "correct": "A", "display_num": 136}, {"id": 164, "question": "Analgesic, anti-inflammatory and antipyretic effects of salicylates and pyrazolone derivatives are associated with inhibition of formation", "options": [{"letter": "A", "text": "enkephalins"}, {"letter": "B", "text": "prostaglandins"}, {"letter": "C", "text": "endorphins"}, {"letter": "D", "text": "thromboxane"}, {"letter": "E", "text": "leukotrienes"}], "correct": "B", "display_num": 137}, {"id": 138, "question": "Hypnotic and antiepileptic effects are characteristic of", "options": [{"letter": "A", "text": "phenytoin (diphenin)"}, {"letter": "B", "text": "ethosuximide"}, {"letter": "C", "text": "carbamazepine"}, {"letter": "D", "text": "phenobarbital"}], "correct": "D", "display_num": 138}, {"id": 36, "question": "A local anesthetic used only for surface anesthesia", "options": [{"letter": "A", "text": "bupivacaine (marcaine)"}, {"letter": "B", "text": "lidocaine"}, {"letter": "C", "text": "procaine (novocaine)"}, {"letter": "D", "text": "benzocaine (anesthetic)"}, {"letter": "E", "text": "trimecaine"}], "correct": "D", "display_num": 139}, {"id": 3, "question": "Enteral route of drug administration", "options": [{"letter": "A", "text": "into the artery"}, {"letter": "B", "text": "to vienna"}, {"letter": "C", "text": "under the skin"}, {"letter": "D", "text": "inside"}, {"letter": "E", "text": "under the brain membranes"}], "correct": "D", "display_num": 140}, {"id": 45, "question": "Pilocarpine reduces", "options": [{"letter": "A", "text": "outflow of intraocular fluid"}, {"letter": "B", "text": "the tone of the muscle constricting the pupil"}, {"letter": "C", "text": "ciliary muscle tone"}, {"letter": "D", "text": "intraocular pressure"}, {"letter": "E", "text": "the tone of the muscle that dilates the pupil"}], "correct": "D", "display_num": 141}, {"id": 14, "question": "Medicinal substances that excite some receptors and block others are designated as", "options": [{"letter": "A", "text": "agonists - antagonists"}, {"letter": "B", "text": "antagonists"}, {"letter": "C", "text": "complete agonists"}, {"letter": "D", "text": "agonists"}, {"letter": "E", "text": "partial agonists"}], "correct": "A", "display_num": 142}, {"id": 126, "question": "A drug for anesthesia, administered intravenously, causes \"dissociative anesthesia\", has a pronounced analgesic effect, can cause hallucinations", "options": [{"letter": "A", "text": "ketamine"}, {"letter": "B", "text": "halothane"}, {"letter": "C", "text": "hexobarbital sodium"}, {"letter": "D", "text": "thiopental-sodium"}, {"letter": "E", "text": "propofol"}], "correct": "A", "display_num": 143}, {"id": 63, "question": "M-holinoblockers can increase intraocular pressure, since", "options": [{"letter": "A", "text": "increase the production of intraocular fluid"}, {"letter": "B", "text": "cause a spasm of accommodation"}, {"letter": "C", "text": "obstruct the outflow of intraocular fluid"}, {"letter": "D", "text": "reduce the permeability of the vascular wall"}, {"letter": "E", "text": "cause myosis"}], "correct": "C", "display_num": 144}, {"id": 150, "question": "Trimeperidine (promedol) is", "options": [{"letter": "A", "text": "narcotic analgesic"}, {"letter": "B", "text": "nonsteroidal anti-inflammatory agent"}, {"letter": "C", "text": "antagonist of narcotic analgesics"}, {"letter": "D", "text": "opium alkaloid"}, {"letter": "E", "text": "non-narcotic analgesic"}], "correct": "A", "display_num": 145}, {"id": 39, "question": "M-cholinomimetic", "options": [{"letter": "A", "text": "acetylcholine"}, {"letter": "B", "text": "galantamine (nivalin)"}, {"letter": "C", "text": "pilocarpine"}, {"letter": "D", "text": "neostigmine methyl sulfate (proserin)"}, {"letter": "E", "text": "platyphillin"}], "correct": "C", "display_num": 146}, {"id": 158, "question": "A drug that blocks all subtypes of opioid receptors is used as an antagonist in overdose of opioid analgesics", "options": [{"letter": "A", "text": "metamizole-sodium"}, {"letter": "B", "text": "paracetamol"}, {"letter": "C", "text": "fentanyl"}, {"letter": "D", "text": "naloxone"}, {"letter": "E", "text": "morphine"}], "correct": "D", "display_num": 147}, {"id": 167, "question": "Acetylsalicylic acid is", "options": [{"letter": "A", "text": "anticoagulant"}, {"letter": "B", "text": "fibrinolytic agent"}, {"letter": "C", "text": "antifibrinolytic agent"}, {"letter": "D", "text": "antiplatelet agents"}, {"letter": "E", "text": "antianemic agent"}], "correct": "D", "display_num": 148}, {"id": 67, "question": "M-holinoblocker, used only for bronchospasms is", "options": [{"letter": "A", "text": "platyphillin"}, {"letter": "B", "text": "atropine"}, {"letter": "C", "text": "scopolamine"}, {"letter": "D", "text": "pyrenzepine (gastrocepine)"}, {"letter": "E", "text": "ipratropium (atrovent)"}], "correct": "E", "display_num": 149}, {"id": 82, "question": "Alpha1-adrenomimetic is", "options": [{"letter": "A", "text": "xylometazoline (galazoline)"}, {"letter": "B", "text": "phenylephrine (mezaton)"}, {"letter": "C", "text": "epinephrine (adrenaline)"}, {"letter": "D", "text": "phenoterol (berotec)"}, {"letter": "E", "text": "salbutamol (ventolin)"}], "correct": "B", "display_num": 150}, {"id": 57, "question": "M-holinoblockers cause", "options": [{"letter": "A", "text": "tachycardia"}, {"letter": "B", "text": "bradycardia"}, {"letter": "C", "text": "bronchospasm"}, {"letter": "D", "text": "colic"}, {"letter": "E", "text": "strengthening of intestinal peristalsis"}], "correct": "A", "display_num": 151}, {"id": 8, "question": "Parenteral route of drug administration", "options": [{"letter": "A", "text": "sublingual (under the tongue)"}, {"letter": "B", "text": "to vienna"}, {"letter": "C", "text": "inside"}, {"letter": "D", "text": "rectally"}, {"letter": "E", "text": "transbuccally"}], "correct": "B", "display_num": 152}, {"id": 170, "question": "Nonsteroidal anti-inflammatory drugs inhibit education", "options": [{"letter": "A", "text": "phospholipids"}, {"letter": "B", "text": "arachidonic acid"}, {"letter": "C", "text": "leukotrienes"}, {"letter": "D", "text": "prostaglandins"}], "correct": "D", "display_num": 153}, {"id": 107, "question": "Prazosin dilates blood vessels due to", "options": [{"letter": "A", "text": "blockades of alpha1-adrenergic receptors"}, {"letter": "B", "text": "blockades of beta-adrenergic receptors"}, {"letter": "C", "text": "blockades of calcium channels"}, {"letter": "D", "text": "blockades of M-cholinergic receptors"}, {"letter": "E", "text": "angiotensin receptor blockades"}], "correct": "A", "display_num": 154}, {"id": 29, "question": "When an overdose of methyl alcohol is used", "options": [{"letter": "A", "text": "phenazepam"}, {"letter": "B", "text": "naloxone"}, {"letter": "C", "text": "ethyl alcohol"}, {"letter": "D", "text": "buprenorphine"}, {"letter": "E", "text": "caffeine"}], "correct": "C", "display_num": 155}, {"id": 64, "question": "Indications for the use of atropine are", "options": [{"letter": "A", "text": "poisoning with belladonna berries"}, {"letter": "B", "text": "atrioventricular block"}, {"letter": "C", "text": "glaucoma"}, {"letter": "D", "text": "obstipation"}, {"letter": "E", "text": "atony of the bladder"}], "correct": "B", "display_num": 156}, {"id": 70, "question": "Side effect of atropine is", "options": [{"letter": "A", "text": "dry mouth"}, {"letter": "B", "text": "diarrhea"}, {"letter": "C", "text": "bronchospasm"}, {"letter": "D", "text": "myosis"}, {"letter": "E", "text": "bradycardia"}], "correct": "A", "display_num": 157}, {"id": 106, "question": "Indications for the use of prazosin", "options": [{"letter": "A", "text": "angina pectoris"}, {"letter": "B", "text": "hypotension"}, {"letter": "C", "text": "arterial hypertension"}, {"letter": "D", "text": "bronchial asthma"}, {"letter": "E", "text": "cardiac arrhythmias"}], "correct": "C", "display_num": 158}, {"id": 177, "question": "It is used as an antiepileptic agent, stimulates gabaergic processes in the brain, induces the induction of microsomal liver enzymes", "options": [{"letter": "A", "text": "phenytoin (diphenin)"}, {"letter": "B", "text": "phenobarbital"}, {"letter": "C", "text": "diazepam"}, {"letter": "D", "text": "zolpidem"}, {"letter": "E", "text": "ethosuximide"}], "correct": "B", "display_num": 159}, {"id": 193, "question": "Haloperidol increases the release of prolactin because it blocks dopamine receptors", "options": [{"letter": "A", "text": "hypothalamus"}, {"letter": "B", "text": "they are an agonist of bromocriptine"}, {"letter": "C", "text": "are dopamine agonists"}, {"letter": "D", "text": "mesolimbic system"}, {"letter": "E", "text": "extrapyramidal system"}], "correct": "A", "display_num": 160}, {"id": 76, "question": "Depolarizing muscle relaxant is", "options": [{"letter": "A", "text": "tubocurarine"}, {"letter": "B", "text": "vecuronium"}, {"letter": "C", "text": "pancuronium (pavulone)"}, {"letter": "D", "text": "pipecuronium (arduan)"}, {"letter": "E", "text": "suxamethonium iodide (ditilin)"}], "correct": "E", "display_num": 161}, {"id": 124, "question": "Means for inhalation anesthesia", "options": [{"letter": "A", "text": "halothane"}, {"letter": "B", "text": "sodium oxybutyrate"}, {"letter": "C", "text": "propofol"}, {"letter": "D", "text": "thiopental-sodium"}, {"letter": "E", "text": "ketamine"}], "correct": "A", "display_num": 162}, {"id": 121, "question": "Atenolol, unlike propranolol, changes little", "options": [{"letter": "A", "text": "atrioventricular conduction"}, {"letter": "B", "text": "heart rate strength"}, {"letter": "C", "text": "blood pressure"}, {"letter": "D", "text": "heart rate"}, {"letter": "E", "text": "bronchial tone"}], "correct": "E", "display_num": 163}, {"id": 27, "question": "The combined use of medicinal substances leads to", "options": [{"letter": "A", "text": "summation of effects"}, {"letter": "B", "text": "sensitization"}, {"letter": "C", "text": "cumulations"}, {"letter": "D", "text": "drug addiction"}, {"letter": "E", "text": "addictive"}], "correct": "A", "display_num": 164}, {"id": 96, "question": "Epinephrine is injected", "options": [{"letter": "A", "text": "into the 12-duodenum"}, {"letter": "B", "text": "to vienna"}, {"letter": "C", "text": "inside"}, {"letter": "D", "text": "under the tongue"}, {"letter": "E", "text": "rectally"}], "correct": "B", "display_num": 165}, {"id": 17, "question": "Tachyphylaxis is", "options": [{"letter": "A", "text": "fast addictive"}, {"letter": "B", "text": "increased sensitivity to the substance with repeated injections"}, {"letter": "C", "text": "unusual reaction to the introduction of the substance"}, {"letter": "D", "text": "accumulation of substances in the body"}], "correct": "A", "display_num": 166}, {"id": 47, "question": "The indication for the use of pilocarpine is", "options": [{"letter": "A", "text": "bronchial asthma"}, {"letter": "B", "text": "intestinal atony"}, {"letter": "C", "text": "glaucoma"}, {"letter": "D", "text": "arterial hypertension"}, {"letter": "E", "text": "fundus examination"}], "correct": "C", "display_num": 167}, {"id": 66, "question": "M-holinoblocker, used only to reduce the secretion of gastric glands is", "options": [{"letter": "A", "text": "scopolamine"}, {"letter": "B", "text": "ipratropium (atrovent)"}, {"letter": "C", "text": "pyrenzepine (gastrocepine)"}, {"letter": "D", "text": "atropine"}, {"letter": "E", "text": "platyphillin"}], "correct": "C", "display_num": 168}, {"id": 110, "question": "Beta1, beta2-adrenoblockers increase", "options": [{"letter": "A", "text": "automatism of the heart"}, {"letter": "B", "text": "heart rate"}, {"letter": "C", "text": "bronchial tone"}, {"letter": "D", "text": "atrioventricular conduction"}, {"letter": "E", "text": "heart rate strength"}], "correct": "C", "display_num": 169}, {"id": 44, "question": "Pilocarpine reduces intraocular pressure because", "options": [{"letter": "A", "text": "facilitates the outflow of intraocular fluid"}, {"letter": "B", "text": "hinders the outflow of intraocular fluid"}, {"letter": "C", "text": "increases the production of intraocular fluid"}, {"letter": "D", "text": "causes vasospasm of the ciliary body"}, {"letter": "E", "text": "reduces the production of intraocular fluid"}], "correct": "A", "display_num": 170}, {"id": 28, "question": "Antagonism is", "options": [{"letter": "A", "text": "attenuation of the effect of a medicinal substance by another medicinal substance"}, {"letter": "B", "text": "enhancing the final effect"}, {"letter": "C", "text": "weakening of the effect of the medicinal substance with its repeated administration"}, {"letter": "D", "text": "enhancing the effect of the medicinal substance with its repeated administration"}, {"letter": "E", "text": "enhancing the effect of the medicinal substance to others medicinal substance"}], "correct": "A", "display_num": 171}, {"id": 192, "question": "An antipsychotic drug that does not cause extrapyramidal disorders is", "options": [{"letter": "A", "text": "sulpiride"}, {"letter": "B", "text": "haloperidol"}, {"letter": "C", "text": "levomepromazine"}, {"letter": "D", "text": "fluorophenazine"}, {"letter": "E", "text": "chlorpromazine"}], "correct": "A", "display_num": 172}, {"id": 154, "question": "Short-acting opioid analgesic (20-30 min)", "options": [{"letter": "A", "text": "fentanyl (fentanyl)"}, {"letter": "B", "text": "butorphanol (moradol)"}, {"letter": "C", "text": "droperidol (droleptan)"}, {"letter": "D", "text": "trimeperidine (promedol)"}, {"letter": "E", "text": "morphine"}], "correct": "A", "display_num": 173}, {"id": 135, "question": "Duration of the \"fast\" sleep phase barbiturates", "options": [{"letter": "A", "text": "shorten"}, {"letter": "B", "text": "do not change"}, {"letter": "C", "text": "lengthen"}], "correct": "A", "display_num": 174}, {"id": 59, "question": "Action of M-holinoblockers is to", "options": [{"letter": "A", "text": "increase the tone of smooth muscles"}, {"letter": "B", "text": "reduce intraocular pressure"}, {"letter": "C", "text": "cause a spasm of accommodation"}, {"letter": "D", "text": "constrict the pupil (miosis)"}, {"letter": "E", "text": "dilate the pupil (mydriasis)"}], "correct": "E", "display_num": 175}, {"id": 104, "question": "Prazosin", "options": [{"letter": "A", "text": "narrows blood vessels"}, {"letter": "B", "text": "dilates blood vessels"}, {"letter": "C", "text": "causes bronchospasm"}, {"letter": "D", "text": "increases blood pressure"}, {"letter": "E", "text": "relaxes the bronchi"}], "correct": "B", "display_num": 176}, {"id": 166, "question": "Acetylsalicylic acid can cause", "options": [{"letter": "A", "text": "physical drug addiction"}, {"letter": "B", "text": "ulceration of the mucous membrane of the gastrointestinal tract"}, {"letter": "C", "text": "suppression of hematopoiesis"}, {"letter": "D", "text": "hypnotic effect"}, {"letter": "E", "text": "thrombosis"}], "correct": "B", "display_num": 177}, {"id": 101, "question": "The drug acting presynaptic is", "options": [{"letter": "A", "text": "epinephrine (adrenaline)"}, {"letter": "B", "text": "salbutamol"}, {"letter": "C", "text": "phenylephrine (mezaton)"}, {"letter": "D", "text": "naphazoline (naphthyzine)"}, {"letter": "E", "text": "ephedrine"}], "correct": "E", "display_num": 178}, {"id": 102, "question": "Alpha1-adrenoblocker", "options": [{"letter": "A", "text": "labetalol"}, {"letter": "B", "text": "atenolol (tenormin)"}, {"letter": "C", "text": "clonidine (clonidine)"}, {"letter": "D", "text": "propranolol (anaprilin)"}, {"letter": "E", "text": "prazosin (adversuten)"}], "correct": "E", "display_num": 179}, {"id": 156, "question": "Analgesic used in combination with droperidol for neuroleptanalgesia", "options": [{"letter": "A", "text": "morphine"}, {"letter": "B", "text": "butorphanol"}, {"letter": "C", "text": "metamizole-sodium"}, {"letter": "D", "text": "fentanyl"}, {"letter": "E", "text": "trimeperidine (promedol)"}], "correct": "D", "display_num": 180}, {"id": 108, "question": "Beta-blocker", "options": [{"letter": "A", "text": "prazosin (adversuten)"}, {"letter": "B", "text": "clonidine (clonidine)"}, {"letter": "C", "text": "epinephrine"}, {"letter": "D", "text": "labetalol"}, {"letter": "E", "text": "propranolol (anaprilin)"}], "correct": "E", "display_num": 181}, {"id": 185, "question": "The MAO-B inhibitor is", "options": [{"letter": "A", "text": "carbidopa"}, {"letter": "B", "text": "bromocriptine"}, {"letter": "C", "text": "trihexyphenidyl (cyclodol)"}, {"letter": "D", "text": "selegiline"}, {"letter": "E", "text": "amantadine (midantan)"}], "correct": "D", "display_num": 182}, {"id": 22, "question": "An unusual reaction to medicinal substances associated with genetically determined enzymopathy and occurring at the first administration of substances", "options": [{"letter": "A", "text": "sensitization"}, {"letter": "B", "text": "tachyphylaxis"}, {"letter": "C", "text": "abstinence"}, {"letter": "D", "text": "addictive"}, {"letter": "E", "text": "idiosyncrasy"}], "correct": "E", "display_num": 183}, {"id": 122, "question": "Reserpine", "options": [{"letter": "A", "text": "alpha1,alpha2-adrenoblocker"}, {"letter": "B", "text": "beta1-adrenoblocker"}, {"letter": "C", "text": "beta1,beta2-adrenoblocker"}, {"letter": "D", "text": "sympatholytics"}, {"letter": "E", "text": "alpha1-adrenoblocker"}], "correct": "D", "display_num": 184}, {"id": 152, "question": "Opioid analgesic from the group of antagonist agonists and partial agonists of opioid receptors", "options": [{"letter": "A", "text": "metamizole-sodium"}, {"letter": "B", "text": "fentanyl (fentanyl)"}, {"letter": "C", "text": "morphine"}, {"letter": "D", "text": "buprenorphine (buprenex)"}, {"letter": "E", "text": "droperidol (droleptan)"}], "correct": "D", "display_num": 185}, {"id": 1, "question": "Pharmacodynamics studies", "options": [{"letter": "A", "text": "biotransformation"}, {"letter": "B", "text": "distribution in the body"}, {"letter": "C", "text": "suction"}, {"letter": "D", "text": "excretion from the body"}, {"letter": "E", "text": "localization and mechanisms of action"}], "correct": "E", "display_num": 186}, {"id": 93, "question": "Salbutamol and phenoterol are used", "options": [{"letter": "A", "text": "to enhance the contractile activity of the myometrium"}, {"letter": "B", "text": "with a runny nose (rhinitis)"}, {"letter": "C", "text": "when the heart stops"}, {"letter": "D", "text": "with arrhythmias"}, {"letter": "E", "text": "for bronchial dilation"}], "correct": "E", "display_num": 187}, {"id": 88, "question": "Epinephrine is used for", "options": [{"letter": "A", "text": "hypertensive crisis"}, {"letter": "B", "text": "atrial extrasystole"}, {"letter": "C", "text": "tachycardia"}, {"letter": "D", "text": "angina pectoris tension"}, {"letter": "E", "text": "cardiac arrest"}], "correct": "E", "display_num": 188}, {"id": 178, "question": "Trihexyphenidyl (cyclodol) is used", "options": [{"letter": "A", "text": "as a means for anesthesia"}, {"letter": "B", "text": "with parkinsonism"}, {"letter": "C", "text": "insomnia"}, {"letter": "D", "text": "with epilepsy"}], "correct": "B", "display_num": 189}, {"id": 131, "question": "Sleeping pills from the benzodiazepine group duration of the \"fast\" sleep phase", "options": [{"letter": "A", "text": "do not change"}, {"letter": "B", "text": "increase"}, {"letter": "C", "text": "reduce"}], "correct": "C", "display_num": 190}, {"id": 141, "question": "Side effect characteristic of non-narcotic analgesics pyrazolone derivative (metamizole sodium (analgin), phenylbutazone (butadione)) - this is", "options": [{"letter": "A", "text": "physical drug addiction"}, {"letter": "B", "text": "depression of the breathing center"}, {"letter": "C", "text": "mydriasis"}, {"letter": "D", "text": "violation of hematopoiesis"}, {"letter": "E", "text": "suppression of gastrointestinal peristalsis"}], "correct": "D", "display_num": 191}, {"id": 72, "question": "Hexamethonium benzosulfonate and trepyria iodide are", "options": [{"letter": "A", "text": "curare-like remedies"}, {"letter": "B", "text": "M,N-holinoblockers"}, {"letter": "C", "text": "ganglioblockers"}, {"letter": "D", "text": "anticholinesterase agents"}, {"letter": "E", "text": "M-holinoblockers"}], "correct": "C", "display_num": 192}, {"id": 194, "question": "Haloperidol -", "options": [{"letter": "A", "text": "psychostimulating agent"}, {"letter": "B", "text": "nootropic agent"}, {"letter": "C", "text": "anxiolytic (tranquilizer)"}, {"letter": "D", "text": "antipsychotic agent (neuroleptic)"}, {"letter": "E", "text": "sedative"}], "correct": "D", "display_num": 193}, {"id": 56, "question": "M-holinoblocker is", "options": [{"letter": "A", "text": "atropine"}, {"letter": "B", "text": "epinephrine (adrenaline)"}, {"letter": "C", "text": "galantamine (nivalin)"}, {"letter": "D", "text": "pilocarpine hydrochloride"}, {"letter": "E", "text": "suxamethonium iodide"}], "correct": "A", "display_num": 194}, {"id": 99, "question": "Side effect of epinephrine", "options": [{"letter": "A", "text": "tachycardia"}, {"letter": "B", "text": "diarrhea"}, {"letter": "C", "text": "atrioventricular block"}, {"letter": "D", "text": "bradycardia"}, {"letter": "E", "text": "increased intraocular pressure"}], "correct": "A", "display_num": 195}, {"id": 140, "question": "Morphine", "options": [{"letter": "A", "text": "blocks opioid receptors"}, {"letter": "B", "text": "stimulates adrenoreceptors"}, {"letter": "C", "text": "stimulates opioid receptors"}, {"letter": "D", "text": "stimulates serotonin receptors"}, {"letter": "E", "text": "blocks NMDA receptors"}], "correct": "C", "display_num": 196}, {"id": 80, "question": "Trepyria iodide (hygronium) is used", "options": [{"letter": "A", "text": "in case of carbon monoxide poisoning"}, {"letter": "B", "text": "for controlled hypotension"}, {"letter": "C", "text": "with bladder atony"}, {"letter": "D", "text": "with asphyxia of newborns"}, {"letter": "E", "text": "with glaucoma"}], "correct": "B", "display_num": 197}, {"id": 98, "question": "Increases the release of the mediator from the adrenergic nerve endings", "options": [{"letter": "A", "text": "propranolol"}, {"letter": "B", "text": "norepinephrine (norepinephrine)"}, {"letter": "C", "text": "metoprolol"}, {"letter": "D", "text": "clonidine (clonidine)"}, {"letter": "E", "text": "ephedrine"}], "correct": "E", "display_num": 198}, {"id": 187, "question": "Chlorpromazine and haloperidol are", "options": [{"letter": "A", "text": "antipsychotic drugs"}, {"letter": "B", "text": "nootropic drugs"}, {"letter": "C", "text": "sedatives"}, {"letter": "D", "text": "antidepressants"}, {"letter": "E", "text": "anxiolytics"}], "correct": "A", "display_num": 199}];
+
+let current = 0;
+let userAnswers = {};
+
+function startQuiz() {
+  document.getElementById('start-screen').classList.add('hidden');
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('progress-wrap').classList.remove('hidden');
+  renderQuestion();
+}
+
+function renderQuestion() {
+  const q = QUESTIONS[current];
+  const total = QUESTIONS.length;
+  // Progress
+  document.getElementById('prog-count').textContent = `${current+1} / ${total}`;
+  document.getElementById('prog-bar').style.width = `${((current+1)/total*100).toFixed(1)}%`;
+  // Nav buttons
+  document.getElementById('prev-btn').disabled = current === 0;
+  const isLast = current === total - 1;
+  document.getElementById('next-btn').classList.toggle('hidden', isLast);
+  document.getElementById('submit-btn').classList.toggle('hidden', !isLast);
+  
+  const answered = userAnswers[q.id];
+  const alreadyAnswered = answered !== undefined;
+  
+  const opts = q.options.map(o => {
+    let cls = 'option-btn';
+    let icon = '';
+    if (alreadyAnswered) {
+      if (o.letter === q.correct) { cls += ' correct'; icon = ' ✓'; }
+      else if (o.letter === answered) { cls += ' wrong'; icon = ' ✗'; }
+    } else if (o.letter === answered) {
+      cls += ' selected';
+    }
+    return `<button class="${cls}" onclick="selectOption('${q.id}','${o.letter}','${q.correct}')" ${alreadyAnswered ? 'disabled' : ''}>
+      <span class="opt-letter">${o.letter}</span>
+      <span>${escHtml(o.text)}${icon}</span>
+    </button>`;
+  }).join('');
+  
+  let feedback = '';
+  if (alreadyAnswered) {
+    if (answered === q.correct) {
+      feedback = `<div class="feedback correct">✓ Correct!</div>`;
+    } else {
+      const correctText = q.options.find(o=>o.letter===q.correct)?.text || '';
+      feedback = `<div class="feedback wrong">✗ Incorrect. Correct answer: <strong>${escHtml(correctText)}</strong></div>`;
+    }
+  }
+  
+  document.getElementById('q-container').innerHTML = `
+    <div class="q-card">
+      <div class="q-meta">
+        <span class="q-badge">Q ${current+1}</span>
+        <span class="q-id">Original #${q.id}</span>
+      </div>
+      <div class="q-text">${escHtml(q.question)}</div>
+      <div class="options-list">${opts}</div>
+      ${feedback}
+    </div>`;
+}
+
+function escHtml(t) {
+  return (t||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+}
+
+function selectOption(qId, letter, correct) {
+  if (userAnswers[qId] !== undefined) return;
+  userAnswers[qId] = letter;
+  renderQuestion();
+  // Auto-advance after short delay
+  setTimeout(() => { if (current < QUESTIONS.length - 1) navigate(1); }, 800);
+}
+
+function navigate(dir) {
+  current = Math.max(0, Math.min(QUESTIONS.length-1, current+dir));
+  renderQuestion();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function submitQuiz() {
+  // Calculate results
+  let correct = 0, wrong = 0, skipped = 0;
+  QUESTIONS.forEach(q => {
+    const a = userAnswers[q.id];
+    if (a === undefined) skipped++;
+    else if (a === q.correct) correct++;
+    else wrong++;
+  });
+  const total = QUESTIONS.length;
+  const pct = Math.round(correct/total*100);
+  
+  // Show results screen
+  document.getElementById('quiz-screen').classList.add('hidden');
+  document.getElementById('progress-wrap').classList.add('hidden');
+  document.getElementById('results-screen').style.display = 'block';
+  
+  // Update stats
+  document.getElementById('score-pct').textContent = pct + '%';
+  document.getElementById('r-correct').textContent = correct;
+  document.getElementById('r-wrong').textContent = wrong;
+  document.getElementById('r-skip').textContent = skipped;
+  
+  // Ring animation
+  const circumference = 427.3;
+  const offset = circumference - (pct/100)*circumference;
+  const ring = document.getElementById('ring-fill');
+  const color = pct >= 80 ? '#34d399' : pct >= 60 ? '#6c8cff' : '#f87171';
+  ring.style.stroke = color;
+  document.getElementById('score-pct').style.color = color;
+  setTimeout(() => { ring.style.strokeDashoffset = offset; }, 100);
+  
+  // Title
+  const titles = pct>=90 ? ['Outstanding! 🏆','Exceptional pharmacology knowledge!'] :
+                 pct>=80 ? ['Excellent! 🎉','Great command of the material!'] :
+                 pct>=70 ? ['Well Done! 👍','Solid understanding overall.'] :
+                 pct>=60 ? ['Good Effort! 📚','Keep reviewing the tricky topics.'] :
+                           ['Keep Studying! 💪','Review the answer key and try again.'];
+  document.getElementById('result-title').textContent = titles[0];
+  document.getElementById('result-sub').textContent = `${titles[1]} You scored ${correct} out of ${total}.`;
+  
+  // Update filter tab labels
+  document.getElementById('ftab-c').textContent = `Correct (${correct})`;
+  document.getElementById('ftab-w').textContent = `Wrong (${wrong})`;
+  document.getElementById('ftab-s').textContent = `Skipped (${skipped})`;
+  
+  buildReview('all');
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+
+function buildReview(filter) {
+  const list = document.getElementById('review-list');
+  list.innerHTML = '';
+  QUESTIONS.forEach((q, idx) => {
+    const a = userAnswers[q.id];
+    const isCorrect = a === q.correct;
+    const isSkipped = a === undefined;
+    const isWrong = !isCorrect && !isSkipped;
+    
+    if (filter === 'correct' && !isCorrect) return;
+    if (filter === 'wrong' && !isWrong) return;
+    if (filter === 'skipped' && !isSkipped) return;
+    
+    const tagCls = isCorrect ? 'c' : isSkipped ? 's' : 'w';
+    const tagTxt = isCorrect ? '✓ Correct' : isSkipped ? '— Skipped' : '✗ Wrong';
+    const itemCls = isCorrect ? 'correct-item' : isSkipped ? 'skipped-item' : 'wrong-item';
+    const correctText = q.options.find(o=>o.letter===q.correct)?.text || '';
+    const yourText = a ? (q.options.find(o=>o.letter===a)?.text || '') : '—';
+    
+    list.innerHTML += `
+      <div class="review-item ${itemCls}">
+        <span class="tag ${tagCls}">${tagTxt}</span>
+        <div class="review-q"><strong>Q${idx+1}.</strong> ${escHtml(q.question)}</div>
+        <div class="review-ans" style="color:var(--success)">✓ Correct: <span>${escHtml(correctText)}</span></div>
+        ${!isCorrect ? `<div class="review-ans" style="color:var(--danger);margin-top:0.3rem">✗ Your answer: <span>${escHtml(yourText)}</span></div>` : ''}
+      </div>`;
+  });
+}
+
+function filterReview(type, btn) {
+  document.querySelectorAll('.ftab').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  buildReview(type);
+}
+
+function retakeQuiz() {
+  userAnswers = {};
+  current = 0;
+  // Shuffle questions again
+  for (let i = QUESTIONS.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i+1));
+    [QUESTIONS[i], QUESTIONS[j]] = [QUESTIONS[j], QUESTIONS[i]];
+    // Also shuffle options
+  }
+  document.getElementById('results-screen').style.display = 'none';
+  document.getElementById('quiz-screen').classList.remove('hidden');
+  document.getElementById('progress-wrap').classList.remove('hidden');
+  renderQuestion();
+  window.scrollTo({top:0, behavior:'smooth'});
+}
+</script>
+</body>
+</html>
